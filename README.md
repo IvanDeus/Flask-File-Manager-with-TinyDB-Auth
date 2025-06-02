@@ -38,7 +38,7 @@ source venv/bin/activate  # On Windows use: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 ### 4. Configuration
-Edit app_cfg.py to customize (just copy app_cfg.example.py and customize):
+Copy app_cfg.example.py to app_cfg.py and edit to customize:
 
 ```python
 SECRET_KEY = 'your-very-secret-key'  # Change this!
