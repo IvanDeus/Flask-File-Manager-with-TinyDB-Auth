@@ -9,6 +9,9 @@ from logging.handlers import RotatingFileHandler
 from app_cfg import (SECRET_KEY, UPLOAD_FOLDER, MAX_CONTENT_LENGTH, DB_FILE, 
                     SESSION_COOKIE_NAME, PERMANENT_SESSION_LIFETIME,
                     LOG_FILE, LOG_LEVEL, LOG_FORMAT)
+import random
+import string
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
@@ -36,6 +39,9 @@ app.config['PERMANENT_SESSION_LIFETIME'] = PERMANENT_SESSION_LIFETIME
 db = TinyDB(DB_FILE)
 User = Query()
 
+def generate_activation_code():
+    return ''.join(random.choices(string.digits, k=ACTIVATION_CODE_LENGTH))
+  
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -43,9 +49,17 @@ def login_required(f):
             app.logger.warning('Unauthorized access attempt')
             flash('Please log in to access this page.', 'danger')
             return redirect(url_for('login'))
+        
+        # Check if account is activated
+        user = db.search(User.id == session['user_id'])
+        if user and not user[0].get('activated', True):
+            session.pop('user_id', None)
+            flash('Your account requires activation. Please log in with your activation code.', 'danger')
+            return redirect(url_for('login'))
+        
         return f(*args, **kwargs)
     return decorated_function
-
+  
 @app.route('/')
 @login_required
 def index():
@@ -105,21 +119,81 @@ def delete_file(filename):
         flash('File not found', 'danger')
     return redirect(url_for('index'))
 
+# Modified register route
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+        
+        if password != confirm_password:
+            app.logger.warning(f"Password mismatch during registration for: {username}")
+            flash('Passwords do not match', 'danger')
+            return redirect(url_for('register'))
+        
+        if db.search(User.username == username):
+            app.logger.warning(f"Username already exists: {username}")
+            flash('Username already exists', 'danger')
+            return redirect(url_for('register'))
+        
+        activation_code = generate_activation_code()
+        user_id = len(db) + 1
+        
+        db.insert({
+            'id': user_id,
+            'username': username,
+            'password': generate_password_hash(password),
+            'activation_code': activation_code,
+            'activated': False,
+            'activation_expires': (datetime.now() + timedelta(hours=ACTIVATION_CODE_EXPIRE_HOURS)).isoformat()
+        })
+        
+        # Log the activation code (in production, you would email/SMS this)
+        app.logger.info(f"New user registered: {username}. Activation code: {activation_code}")
+        
+        flash('Registration successful! Please check your activation code and log in.', 'success')
+        return redirect(url_for('login'))
+    
+    return render_template('register.html')
+
+# Modified login route
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
+        activation_code = request.form.get('activation_code', '')
         
         user = db.search(User.username == username)
-        if user and check_password_hash(user[0]['password'], password):
-            session['user_id'] = user[0]['id']
-            app.logger.info(f"User logged in: {username}")
-            flash('Logged in successfully!', 'success')
-            return redirect(url_for('index'))
-        else:
-            app.logger.warning(f"Failed login attempt for username: {username}")
-            flash('Invalid username or password', 'danger')
+        if user:
+            user = user[0]  # Get first match
+            
+            # Check if account needs activation
+            if not user.get('activated', False):
+                if activation_code != user.get('activation_code', ''):
+                    app.logger.warning(f"Invalid activation code for user: {username}")
+                    flash('Invalid activation code', 'danger')
+                    return render_template('login.html', needs_activation=True)
+                
+                # Activate the account
+                db.update({
+                    'activated': True,
+                    'activation_code': None,
+                    'activation_expires': None
+                }, User.username == username)
+                app.logger.info(f"User account activated: {username}")
+            
+            # Verify password
+            if check_password_hash(user['password'], password):
+                session['user_id'] = user['id']
+                app.logger.info(f"User logged in: {username}")
+                flash('Logged in successfully!', 'success')
+                return redirect(url_for('index'))
+        
+        app.logger.warning(f"Failed login attempt for username: {username}")
+        flash('Invalid username or password', 'danger')
+    
     return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
