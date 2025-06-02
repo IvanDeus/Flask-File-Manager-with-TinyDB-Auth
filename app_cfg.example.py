@@ -24,5 +24,10 @@ DB_FILE = BASE_DIR / 'users_db.json'
 SESSION_COOKIE_NAME = 'file_manager_session'
 PERMANENT_SESSION_LIFETIME = 3600  # 1 hour in seconds
 
+# Logging settings
+LOG_FILE = BASE_DIR / 'app.log'
+LOG_LEVEL = 'INFO'  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+
 # Ensure upload folder exists
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
