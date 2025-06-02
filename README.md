@@ -79,9 +79,9 @@ MIT License - Free for personal and commercial use
 
 ## Troubleshooting
 - Issue: File upload fails
-- Solution: Check MAX_CONTENT_LENGTH in app_cfg.py and ensure sufficient permissions on static/uploaded_files/
+  Solution: Check MAX_CONTENT_LENGTH in app_cfg.py and ensure sufficient permissions on static/uploaded_files/
 
 - Issue: Database problems
-- Solution: Delete users.json to reset all user accounts
+  Solution: Delete users.json to reset all user accounts
 
-[ivan deus] 2025
+2025 [ivan deus]
