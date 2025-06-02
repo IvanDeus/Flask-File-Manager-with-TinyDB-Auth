@@ -23,12 +23,13 @@
             {% for file in files %}
                 <div class="file-card">
                     <div class="d-flex justify-content-between align-items-center">
-                        <a href="{{ url_for('download_file', filename=file) }}" 
-                           target="_blank" 
-                           class="text-decoration-none"
-                           title="Click to open in new tab">
-                            {{ file }}
-                        </a>
+                <!-- Change the filename link to use a specific class -->
+                <a href="{{ url_for('download_file', filename=file) }}" 
+                   target="_blank" 
+                   class="filename-link text-decoration-none"
+                   title="Click to open in new tab">
+                    {{ file }}
+                </a>
                         <div class="file-actions">
                             <a href="{{ url_for('download_file', filename=file) }}" class="btn btn-sm btn-success">Download</a>
                             <a href="{{ url_for('delete_file', filename=file) }}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this file?')">Delete</a>
