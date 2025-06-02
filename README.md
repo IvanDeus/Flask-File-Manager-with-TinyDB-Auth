@@ -25,6 +25,6 @@ A lightweight file management web application built with Flask, featuring:
 
 ### 1. Clone the repository
 ```
-git clone https://github.com/yourusername/flask-file-manager.git
+git clone https://github.com/IvanDeus/Flask-File-Manager-with-TinyDB-Auth.git
 cd flask-file-manager
 ```
