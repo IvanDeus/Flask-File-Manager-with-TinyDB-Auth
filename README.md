@@ -38,7 +38,7 @@ source venv/bin/activate  # On Windows use: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 ### 4. Configuration
-Edit app_cfg.py to customize (just copy app_cfg.example.py):
+Edit app_cfg.py to customize (just copy app_cfg.example.py and customize):
 
 ```python
 SECRET_KEY = 'your-very-secret-key'  # Change this!
@@ -51,3 +51,25 @@ python app.py
 ```
 The application will be available at:
 http://localhost:5000 (or your configured port)
+
+## First-Time Setup
+Access the application in your browser
+
+Register a new user account
+
+Log in with your credentials
+
+Start uploading and managing files
+
+### Production Deployment
+For production environments, consider:
+
+Using Gunicorn or uWSGI as a WSGI server
+
+Setting up Nginx or Apache as a reverse proxy
+
+Changing SECRET_KEY to a strong random value
+
+Setting DEBUG = False in app_cfg.py
+
+Using a proper database system (SQLite/PostgreSQL/MySQL)
