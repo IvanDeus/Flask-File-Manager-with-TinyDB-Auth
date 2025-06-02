@@ -1,26 +1,28 @@
-import os
-from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, abort
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, abort, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from tinydb import TinyDB, Query
 from functools import wraps
+import os
+from app_cfg import SECRET_KEY, UPLOAD_FOLDER, MAX_CONTENT_LENGTH, DB_FILE, SESSION_COOKIE_NAME, PERMANENT_SESSION_LIFETIME
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your-secret-key-here'  # Change this in production!
-app.config['UPLOAD_FOLDER'] = 'static/uploaded_files'
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max upload
 
-# Ensure upload folder exists
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+# Load configuration from app_cfg.py
+app.config['SECRET_KEY'] = SECRET_KEY
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
+app.config['SESSION_COOKIE_NAME'] = SESSION_COOKIE_NAME
+app.config['PERMANENT_SESSION_LIFETIME'] = PERMANENT_SESSION_LIFETIME
 
 # TinyDB setup
-db = TinyDB('users.json')
+db = TinyDB(DB_FILE)
 User = Query()
 
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'user_id' not in request.session:
+        if 'user_id' not in session:
             flash('Please log in to access this page.', 'danger')
             return redirect(url_for('login'))
         return f(*args, **kwargs)
@@ -126,6 +128,7 @@ def logout():
     request.session.pop('user_id', None)
     flash('You have been logged out', 'info')
     return redirect(url_for('login'))
-
+#
 if __name__ == '__main__':
-    app.run(debug=True)
+    from app_cfg import HOST, PORT, DEBUG
+    app.run(host=HOST, port=PORT, debug=DEBUG)
