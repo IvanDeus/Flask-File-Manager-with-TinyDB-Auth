@@ -4,9 +4,26 @@ from werkzeug.utils import secure_filename
 from tinydb import TinyDB, Query
 from functools import wraps
 import os
-from app_cfg import SECRET_KEY, UPLOAD_FOLDER, MAX_CONTENT_LENGTH, DB_FILE, SESSION_COOKIE_NAME, PERMANENT_SESSION_LIFETIME
+import logging
+from logging.handlers import RotatingFileHandler
+from app_cfg import (SECRET_KEY, UPLOAD_FOLDER, MAX_CONTENT_LENGTH, DB_FILE, 
+                    SESSION_COOKIE_NAME, PERMANENT_SESSION_LIFETIME,
+                    LOG_FILE, LOG_LEVEL, LOG_FORMAT)
 
 app = Flask(__name__)
+
+# Configure logging
+def setup_logging():
+    handler = RotatingFileHandler(
+        LOG_FILE,
+        maxBytes=1024 * 1024,  # 1MB
+        backupCount=5
+    )
+    handler.setFormatter(logging.Formatter(LOG_FORMAT))
+    app.logger.addHandler(handler)
+    app.logger.setLevel(LOG_LEVEL)
+
+setup_logging()
 
 # Load configuration from app_cfg.py
 app.secret_key = SECRET_KEY
@@ -23,6 +40,7 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
+            app.logger.warning('Unauthorized access attempt')
             flash('Please log in to access this page.', 'danger')
             return redirect(url_for('login'))
         return f(*args, **kwargs)
@@ -35,23 +53,27 @@ def index():
     upload_folder = app.config['UPLOAD_FOLDER']
     if os.path.exists(upload_folder):
         files = os.listdir(upload_folder)
+    app.logger.info(f"User {session.get('user_id')} accessed index page")
     return render_template('index.html', files=files)
 
 @app.route('/upload', methods=['POST'])
 @login_required
 def upload_file():
     if 'file' not in request.files:
+        app.logger.warning('No file selected for upload')
         flash('No file selected', 'danger')
         return redirect(url_for('index'))
     
     file = request.files['file']
     if file.filename == '':
+        app.logger.warning('Empty filename in upload attempt')
         flash('No file selected', 'danger')
         return redirect(url_for('index'))
     
     if file:
         filename = secure_filename(file.filename)
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        app.logger.info(f"User {session.get('user_id')} uploaded file: {filename}")
         flash('File uploaded successfully', 'success')
     
     return redirect(url_for('index'))
@@ -60,12 +82,14 @@ def upload_file():
 @login_required
 def download_file(filename):
     try:
+        app.logger.info(f"User {session.get('user_id')} downloaded file: {filename}")
         return send_from_directory(
             app.config['UPLOAD_FOLDER'],
             filename,
             as_attachment=True
         )
     except FileNotFoundError:
+        app.logger.error(f"File not found for download: {filename}")
         abort(404)
 
 @app.route('/delete/<filename>')
@@ -74,8 +98,10 @@ def delete_file(filename):
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     if os.path.exists(file_path):
         os.remove(file_path)
+        app.logger.info(f"User {session.get('user_id')} deleted file: {filename}")
         flash('File deleted successfully', 'success')
     else:
+        app.logger.warning(f"Delete attempt failed - file not found: {filename}")
         flash('File not found', 'danger')
     return redirect(url_for('index'))
 
@@ -88,9 +114,11 @@ def login():
         user = db.search(User.username == username)
         if user and check_password_hash(user[0]['password'], password):
             session['user_id'] = user[0]['id']
+            app.logger.info(f"User logged in: {username}")
             flash('Logged in successfully!', 'success')
             return redirect(url_for('index'))
         else:
+            app.logger.warning(f"Failed login attempt for username: {username}")
             flash('Invalid username or password', 'danger')
     return render_template('login.html')
 
@@ -102,10 +130,12 @@ def register():
         confirm_password = request.form.get('confirm_password')
         
         if password != confirm_password:
+            app.logger.warning(f"Password mismatch during registration for: {username}")
             flash('Passwords do not match', 'danger')
             return redirect(url_for('register'))
         
         if db.search(User.username == username):
+            app.logger.warning(f"Username already exists: {username}")
             flash('Username already exists', 'danger')
             return redirect(url_for('register'))
         
@@ -116,18 +146,21 @@ def register():
             'password': generate_password_hash(password)
         })
         session['user_id'] = user_id
-        flash('Registration successful! Please login.', 'success')
-        return redirect(url_for('login'))
+        app.logger.info(f"New user registered: {username}")
+        flash('Registration successful! You are now logged in.', 'success')
+        return redirect(url_for('index'))
     
     return render_template('register.html')
 
 @app.route('/logout')
 @login_required
 def logout():
-    request.session.pop('user_id', None)
+    user_id = session.get('user_id')
+    session.pop('user_id', None)
+    app.logger.info(f"User logged out: {user_id}")
     flash('You have been logged out', 'info')
     return redirect(url_for('login'))
-#
+
 if __name__ == '__main__':
     from app_cfg import HOST, PORT, DEBUG
     app.run(host=HOST, port=PORT, debug=DEBUG)
