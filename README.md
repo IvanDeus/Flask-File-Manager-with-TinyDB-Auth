@@ -57,7 +57,7 @@ Access the application in your browser
 
 Register a new user account
 
-Log in with your credentials
+Log in with your credentials and activation code (from a local app.log file)
 
 Start uploading and managing files
 
