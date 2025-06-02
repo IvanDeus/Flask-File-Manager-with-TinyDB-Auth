@@ -61,7 +61,7 @@ Log in with your credentials
 
 Start uploading and managing files
 
-### Production Deployment
+## Production Deployment
 For production environments, consider:
 
 Using Gunicorn or uWSGI as a WSGI server
@@ -73,3 +73,15 @@ Changing SECRET_KEY to a strong random value
 Setting DEBUG = False in app_cfg.py
 
 Using a proper database system (SQLite/PostgreSQL/MySQL)
+
+## License
+MIT License - Free for personal and commercial use
+
+## Troubleshooting
+- Issue: File upload fails
+- Solution: Check MAX_CONTENT_LENGTH in app_cfg.py and ensure sufficient permissions on static/uploaded_files/
+
+- Issue: Database problems
+- Solution: Delete users.json to reset all user accounts
+
+[ivan deus] 2025
