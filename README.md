@@ -28,3 +28,26 @@ A lightweight file management web application built with Flask, featuring:
 git clone https://github.com/IvanDeus/Flask-File-Manager-with-TinyDB-Auth.git
 cd Flask-File-Manager-with-TinyDB-Auth
 ```
+### 2. Create and activate virtual environment (recommended)
+```
+python -m venv venv
+source venv/bin/activate  # On Windows use: venv\Scripts\activate
+```
+### 3. Install dependencies
+```
+pip install -r requirements.txt
+```
+### 4. Configuration
+Edit app_cfg.py to customize:
+
+```python
+SECRET_KEY = 'your-very-secret-key'  # Change this!
+DEBUG = False  # Set to False in production
+PORT = 5000    # Change port if needed
+```
+### 5. Run the application
+```bash
+python app.py
+```
+The application will be available at:
+http://localhost:5000 (or your configured port)
