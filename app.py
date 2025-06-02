@@ -9,7 +9,7 @@ from app_cfg import SECRET_KEY, UPLOAD_FOLDER, MAX_CONTENT_LENGTH, DB_FILE, SESS
 app = Flask(__name__)
 
 # Load configuration from app_cfg.py
-app.config['SECRET_KEY'] = SECRET_KEY
+app.secret_key = SECRET_KEY
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 app.config['SESSION_COOKIE_NAME'] = SESSION_COOKIE_NAME
@@ -87,12 +87,11 @@ def login():
         
         user = db.search(User.username == username)
         if user and check_password_hash(user[0]['password'], password):
-            request.session['user_id'] = user[0]['id']
+            session['user_id'] = user[0]['id']
             flash('Logged in successfully!', 'success')
             return redirect(url_for('index'))
         else:
             flash('Invalid username or password', 'danger')
-    
     return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -116,7 +115,7 @@ def register():
             'username': username,
             'password': generate_password_hash(password)
         })
-        
+        session['user_id'] = user_id
         flash('Registration successful! Please login.', 'success')
         return redirect(url_for('login'))
     
