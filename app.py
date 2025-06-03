@@ -89,7 +89,6 @@ def upload_file():
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         app.logger.info(f"User {session.get('user_id')} uploaded file: {filename}")
         flash('File uploaded successfully', 'success')
-    
     return redirect(url_for('index'))
 
 @app.route('/download/<filename>')
@@ -136,10 +135,9 @@ def register():
             app.logger.warning(f"Username already exists: {username}")
             flash('Username already exists', 'danger')
             return redirect(url_for('register'))
-        
+
         activation_code = generate_activation_code()
         user_id = len(db) + 1
-        
         db.insert({
             'id': user_id,
             'username': username,
@@ -147,14 +145,11 @@ def register():
             'activation_code': activation_code,
             'activated': False,
             'activation_expires': (datetime.now() + timedelta(hours=ACTIVATION_CODE_EXPIRE_HOURS)).isoformat()
-        })
-        
+        })        
         # Log the activation code (in production, you would email/SMS this)
         app.logger.info(f"New user registered: {username}. Activation code: {activation_code}")
-        
         flash('Registration successful! Please check your activation code and log in.', 'success')
         return redirect(url_for('login'))
-    
     return render_template('register.html')
 
 # Modified login route
@@ -175,7 +170,6 @@ def login():
                     app.logger.warning(f"Invalid activation code for user: {username}")
                     flash('Invalid activation code', 'danger')
                     return render_template('login.html', needs_activation=True)
-                
                 # Activate the account
                 db.update({
                     'activated': True,
@@ -183,7 +177,6 @@ def login():
                     'activation_expires': None
                 }, User.username == username)
                 app.logger.info(f"User account activated: {username}")
-            
             # Verify password
             if check_password_hash(user['password'], password):
                 session['user_id'] = user['id']
@@ -193,38 +186,7 @@ def login():
         
         app.logger.warning(f"Failed login attempt for username: {username}")
         flash('Invalid username or password', 'danger')
-    
     return render_template('login.html')
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        confirm_password = request.form.get('confirm_password')
-        
-        if password != confirm_password:
-            app.logger.warning(f"Password mismatch during registration for: {username}")
-            flash('Passwords do not match', 'danger')
-            return redirect(url_for('register'))
-        
-        if db.search(User.username == username):
-            app.logger.warning(f"Username already exists: {username}")
-            flash('Username already exists', 'danger')
-            return redirect(url_for('register'))
-        
-        user_id = len(db) + 1
-        db.insert({
-            'id': user_id,
-            'username': username,
-            'password': generate_password_hash(password)
-        })
-        session['user_id'] = user_id
-        app.logger.info(f"New user registered: {username}")
-        flash('Registration successful! You are now logged in.', 'success')
-        return redirect(url_for('index'))
-    
-    return render_template('register.html')
 
 @app.route('/logout')
 @login_required
