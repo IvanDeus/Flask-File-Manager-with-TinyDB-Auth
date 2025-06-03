@@ -43,9 +43,11 @@ Copy app_cfg.example.py to app_cfg.py
 ```bash
 cp app_cfg.example.py app_cfg.py
 ```
-And edit to customize:
+And edit app_cfg.py to customize:
 > SECRET_KEY = 'your-very-secret-key'  # Change this!
+> 
 > DEBUG = False  # Set to False in production
+> 
 > PORT = 5000    # Change port if needed
 
 ### 5. Run the application
