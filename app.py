@@ -8,7 +8,8 @@ import logging
 from logging.handlers import RotatingFileHandler
 from app_cfg import (SECRET_KEY, UPLOAD_FOLDER, MAX_CONTENT_LENGTH, DB_FILE, 
                     SESSION_COOKIE_NAME, PERMANENT_SESSION_LIFETIME,
-                    LOG_FILE, LOG_LEVEL, LOG_FORMAT)
+                    LOG_FILE, LOG_LEVEL, LOG_FORMAT,
+                    ACTIVATION_CODE_LENGTH, ACTIVATION_CODE_EXPIRE_HOURS)
 import random
 import string
 from datetime import datetime, timedelta
