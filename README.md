@@ -38,13 +38,16 @@ source venv/bin/activate  # On Windows use: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 ### 4. Configuration
-Copy app_cfg.example.py to app_cfg.py and edit to customize:
+Copy app_cfg.example.py to app_cfg.py 
 
-```python
-SECRET_KEY = 'your-very-secret-key'  # Change this!
-DEBUG = False  # Set to False in production
-PORT = 5000    # Change port if needed
+```bash
+cp app_cfg.example.py app_cfg.py
 ```
+And edit to customize:
+> SECRET_KEY = 'your-very-secret-key'  # Change this!
+> DEBUG = False  # Set to False in production
+> PORT = 5000    # Change port if needed
+
 ### 5. Run the application
 ```bash
 python app.py
