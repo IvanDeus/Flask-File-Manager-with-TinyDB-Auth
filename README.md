@@ -38,8 +38,7 @@ source venv/bin/activate  # On Windows use: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 ### 4. Configuration
-Copy app_cfg.example.py to app_cfg.py 
-
+Copy app_cfg.example.py to app_cfg.py:
 ```bash
 cp app_cfg.example.py app_cfg.py
 ```
@@ -58,13 +57,13 @@ The application will be available at:
 http://localhost:5000 (or your configured port)
 
 ## First-Time Setup
-Access the application in your browser
+- Access the application in your browser
 
-Register a new user account
+- Register a new user account
 
-Log in with your credentials and activation code (from a local app.log file)
+- Log in with your credentials and activation code (from a local app.log file)
 
-Start uploading and managing files
+- Start uploading and managing files!
 
 ## Production Deployment
 For production environments, consider:
