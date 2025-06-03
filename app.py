@@ -126,17 +126,14 @@ def register():
         username = request.form.get('username')
         password = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
-        
         if password != confirm_password:
             app.logger.warning(f"Password mismatch during registration for: {username}")
             flash('Passwords do not match', 'danger')
             return redirect(url_for('register'))
-        
         if db.search(User.username == username):
             app.logger.warning(f"Username already exists: {username}")
             flash('Username already exists', 'danger')
             return redirect(url_for('register'))
-
         activation_code = generate_activation_code()
         user_id = len(db) + 1
         db.insert({
@@ -148,6 +145,7 @@ def register():
             'activation_expires': (datetime.now() + timedelta(hours=ACTIVATION_CODE_EXPIRE_HOURS)).isoformat()
         })        
         # Log the activation code (in production, you would email/SMS this)
+        app.logger.info(f"New user registered: {username}. Activation code: {activation_code}")
         flash('Registration successful! Please log in with your activation code.', 'success')
         return redirect(url_for('login', new_user=True))  # Add new_user parameter
     return render_template('register.html')
