@@ -24,7 +24,7 @@ DB_FILE = BASE_DIR / 'users_db.json'
 SESSION_COOKIE_NAME = 'file_manager_session'
 PERMANENT_SESSION_LIFETIME = 3600  # 1 hour in seconds
 
-# Add these to your existing configuration
+# First time activation
 ACTIVATION_CODE_LENGTH = 5
 ACTIVATION_CODE_EXPIRE_HOURS = 2  # Codes expire after x hours
 
