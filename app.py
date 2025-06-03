@@ -148,23 +148,21 @@ def register():
             'activation_expires': (datetime.now() + timedelta(hours=ACTIVATION_CODE_EXPIRE_HOURS)).isoformat()
         })        
         # Log the activation code (in production, you would email/SMS this)
-        app.logger.info(f"New user registered: {username}. Activation code: {activation_code}")
-        flash('Registration successful! Please check your activation code and log in.', 'success')
-        return redirect(url_for('login'))
+        flash('Registration successful! Please log in with your activation code.', 'success')
+        return redirect(url_for('login', new_user=True))  # Add new_user parameter
     return render_template('register.html')
-
+  
 # Modified login route
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    new_user = request.args.get('new_user', False)  # Check for new u
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
         activation_code = request.form.get('activation_code', '')
-        
         user = db.search(User.username == username)
         if user:
-            user = user[0]  # Get first match
-            
+            user = user[0]
             # Check if account needs activation
             if not user.get('activated', False):
                 if activation_code != user.get('activation_code', ''):
@@ -184,11 +182,10 @@ def login():
                 app.logger.info(f"User logged in: {username}")
                 flash('Logged in successfully!', 'success')
                 return redirect(url_for('index'))
-        
-        app.logger.warning(f"Failed login attempt for username: {username}")
-        flash('Invalid username or password', 'danger')
-    return render_template('login.html')
-
+        flash('Invalid username or password', 'danger')  
+    # Show activation field if new user or existing unactivated user
+    return render_template('login.html', needs_activation=new_user)
+  
 @app.route('/logout')
 @login_required
 def logout():
