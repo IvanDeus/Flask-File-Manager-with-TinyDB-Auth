@@ -6,6 +6,11 @@
             <div class="card">
                 <div class="card-body">
                     <h2 class="card-title text-center mb-4">Login</h2>
+                    {% if needs_activation %}
+                        <div class="alert alert-info mb-3">
+                            Please enter your activation code (check your email)
+                        </div>
+                    {% endif %}
                     <form method="POST" action="{{ url_for('login') }}">
                         <div class="mb-3">
                             <label for="username" class="form-label">Username</label>
