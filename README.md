@@ -1,5 +1,5 @@
 # Flask-File-Manager-with-TinyDB-Auth
-## Flask File Manager with TinyDB Authentication
+## Web-based Flask File Manager with TinyDB Authentication
 
 A lightweight file management web application built with Flask, featuring:
 - User authentication (login/register)
